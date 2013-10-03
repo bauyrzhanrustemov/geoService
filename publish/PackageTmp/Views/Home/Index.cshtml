@@ -1,0 +1,161 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        #gmap {
+            height: 100%;
+            left: 0;
+            position: fixed !important; /* Acts in pretty much the same way as background-attachment: fixed for an image background. Has to be !important only if you're using the Google Maps API. */
+            top: 0;
+            width: 100%;
+            z-index: 1;
+        }
+        /* Has to be at least one increment smaller in value than the container's z-index */
+
+        #container {
+            background: rgb(255, 255, 255);
+            border: 3px solid #fff;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            overflow: visible !important; /* Has to be !important only if you're using an on/off switch */
+            padding: 10px;
+            position: relative;
+            top: 10px;
+            left: 70px;
+            width: 700px;
+            height: 60px;
+            z-index: 2;
+        }
+
+        #listContainer {
+            background: rgb(255, 255, 255);
+            border: 3px solid #fff;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            overflow: visible !important; /* Has to be !important only if you're using an on/off switch */
+            padding: 10px;
+            position: relative;
+            width: 300px;
+            float: right;
+            height: 600px;
+            z-index: 2;
+        }
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript">
+        var markerCount = 0;
+        var fromMarker, toMarker;
+        var directionsDisplay;
+        var directionsService = new google.maps.DirectionsService();
+        var geocoder;
+        function initialize() {
+            geocoder = new google.maps.Geocoder();
+            directionsDisplay = new google.maps.DirectionsRenderer();
+            var mapOptions = {
+                center: new google.maps.LatLng(43.25, 76.9126),
+                zoom: 14,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            var map = new google.maps.Map(document.getElementById("gmap"), mapOptions);
+            directionsDisplay.setMap(map);
+            google.maps.event.addListener(map, 'click', function (event) {
+                if (markerCount == 0) {
+                    if (fromMarker)
+                        fromMarker.setMap(null);
+                    if (toMarker)
+                        toMarker.setMap(null);
+                    fromMarker = new google.maps.Marker({
+                        position: event.latLng,
+                        title: "Hello World!",
+                        options: {
+                            draggable: false,
+                            animation: google.maps.Animation.DROP
+                        },
+                        id: 'marker1'
+                    });
+                    markerCount = 1;
+                    codeLatLng(fromMarker.getPosition(), 'from');
+                    fromMarker.setMap(map);
+                } else {
+                    if (toMarker)
+                        toMarker.setMap(null);
+                    toMarker = new google.maps.Marker({
+                        position: event.latLng,
+                        title: "Hello World!",
+                        options: {
+                            draggable: false,
+                            animation: google.maps.Animation.DROP
+                        },
+                        id: 'marker1'
+                    });
+                    markerCount = 0;
+                    codeLatLng(toMarker.getPosition(), 'to');
+                    toMarker.setMap(map);
+
+                    var request = {
+                        origin: fromMarker.getPosition(),
+                        destination: toMarker.getPosition(),
+                        travelMode: google.maps.DirectionsTravelMode.DRIVING
+                    };
+                    directionsService.route(request, function (response, status) {
+                        if (status == google.maps.DirectionsStatus.OK) {
+                            directionsDisplay.setDirections(response);
+                            if (fromMarker)
+                                fromMarker.setMap(null);
+                            if (toMarker)
+                                toMarker.setMap(null);
+                        }
+                    });
+
+                }
+            });
+        }
+        function codeLatLng(latlng, type) {
+            geocoder.geocode({ 'latLng': latlng }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    if (results[1]) {
+                        console.log(results);
+                        $('#' + type + 'Address')[0].value = results[0].formatted_address
+                    }
+                } else {
+                    alert("Geocoder failed due to: " + status);
+                }
+            });
+        }
+    </script>
+</head>
+<body onload="initialize()">
+    <div id="gmap"></div>
+    <div id="container">
+        <table>
+            <tr>
+                <td>
+                    <b>Адрес отбытия:</b><br>
+                    <input id="fromAddress" type="text" size="50">
+                </td>
+                <td>
+                    <b>Адрес прибытия:</b><br>
+                    <input id="toAddress" type="text" size="50">
+                </td>
+                @*<td>
+                    <br />
+                    <input type="button" value="Найти маршруты">
+                </td>*@
+            </tr>
+        </table>
+    </div>
+    <div id="listContainer">
+        <table>
+            <tr>
+                <td>
+                    <b>Адрес отбытия:</b><br>
+                    <input type="text" size="40">
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
