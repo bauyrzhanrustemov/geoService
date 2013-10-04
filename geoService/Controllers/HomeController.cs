@@ -10,7 +10,11 @@ namespace geoService.Controllers
     {
         public ActionResult Index()
         {
+<<<<<<< HEAD
             ViewBag.Message = "Modify this 1авыавыавtemplate to jump-start your ASP.NET MVC applicationааааааааааааа.";
+=======
+            ViewBag.Message = "Modify this 1авыавыавtemplate to jump-stааааааааааааааааааааart your ASP.NET MVC application.";
+>>>>>>> 3a21a56f8e4acc237874411816088e9438751d1e
 
             return View();
         }
